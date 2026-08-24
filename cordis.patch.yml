@@ -1,0 +1,29 @@
+# dsh-team-auto-router bundle patch: mounts the router plugin into the host
+# composition of a dsh profile. The plugin is fully inert unless the profile
+# layer overrides `autoTrigger` away from 'off' — installing it changes no
+# session behavior by itself.
+#
+# Install: `dsh plugin --profile <name> add <this package>` (npm or a local
+# path), or a `link:` dependency plus a bundles row, mirroring how
+# dsh-self-upgrade is mounted.
+- insert:
+    - id: team-auto-router
+      # Node-resolvable package name — must stay in sync with package.json
+      # `name`. Quoted because `@` is a reserved indicator in YAML and cannot
+      # open a plain scalar.
+      name: dsh-team-auto-router
+      config:
+        # off = never inject anything (default; plugin registers no listener)
+        # ask = past the threshold, inject a directive telling the captain to
+        #       explain the signals and confirm via ask_user_question first
+        # auto = past the threshold, deterministically activate the AgentTeams
+        #        protocol (same shape as the /agent-teams gesture boundary,
+        #        but source.kind stays 'team-auto-router' so logs can tell
+        #        the two apart)
+        autoTrigger: off
+        # Minimum complexity score required to fire.
+        scoreThreshold: 4
+        # Anti-nag window: after one firing, stay silent for this many minutes.
+        cooldownMinutes: 30
+        # Hard veto: shorter genuine user messages are never scored.
+        minLength: 50
