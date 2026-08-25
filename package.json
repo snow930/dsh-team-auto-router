@@ -12,6 +12,10 @@
     "test": "node --test test/*.test.js",
     "prepublishOnly": "npm test"
   },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@deepseek-ai/dsh-llm": "file:~/.local/nodejs/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-llm"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
