@@ -56,3 +56,39 @@ test('scope signal needs two distinct targets', () => {
     const resultSingle = scoreGoal(single, OPTS);
     assert.ok(!resultSingle.signals.some((s) => s.startsWith('scope')), resultSingle.signals.join(';'));
 });
+
+test('compact inline enumeration counts as structure (real-world message)', () => {
+    const text = 'ng浅色模式字幕搜索的文字是黑色背景无法分辨，播放器应该统一为深色，没必要应用浅色。弹幕字体太小看不清，默认字号调大一档并保存设置。播放器面板弹出选项和侧边栏时不要自动隐藏。1改宽侧边栏 2保持点击切换 3横排卡片式布局 4保持现有动画效果不变';
+    const result = scoreGoal(text, OPTS);
+    assert.equal(result.ok, true);
+    assert.ok(result.signals.some((s) => s.includes('inline-enum')), result.signals.join(';'));
+    // Pairs with the profile's scoreThreshold: 2 — real-world multi-part UI
+    // tasks rarely carry path tokens or task-type keywords on top of structure.
+    assert.ok(result.score >= 2, `score=${result.score}, signals=${result.signals}`);
+});
+
+test('quantity digits are not enumerations', () => {
+    const text = '这次更新需要下载2个依赖包和3个字体资源，请确认磁盘空间充足后再继续操作，避免中途失败导致缓存损坏问题出现，整体流程保持简单可靠不要引入额外复杂度，完成后输出简要说明即可';
+    const result = scoreGoal(text, OPTS);
+    assert.equal(result.veto, null);
+    assert.ok(!result.signals.some((s) => s.startsWith('structure')), result.signals.join(';'));
+});
+
+test('spoken coordinators split clauses', () => {
+    const text = '先把当前配置完整备份一份，另外把文档里的安装说明同步成最新步骤，再把版本号统一改成新标签，三处都改完后一起提交推送';
+    const result = scoreGoal(text, OPTS);
+    assert.ok(result.signals.some((s) => s.startsWith('structure')), result.signals.join(';'));
+});
+
+test('nested coordinator pair does not fake two clauses', () => {
+    const text = '请按顺序执行迁移然后再分别核对每个步骤的输出结果与预期是否完全一致，有任何偏差都要当场停下来记录清楚原因';
+    const result = scoreGoal(text, OPTS);
+    assert.ok(!result.signals.some((s) => s.startsWith('structure')), result.signals.join(';'));
+});
+
+test('interrogative opening with imperative hint is scored, not vetoed', () => {
+    const text = '为什么 agent-teams 没有自动启用？请帮我检查 profiles/web 下的全部插件配置并逐项排查问题根源，最后给出修复方案';
+    const result = scoreGoal(text, OPTS);
+    assert.equal(result.veto, null);
+    assert.equal(result.ok, true);
+});
