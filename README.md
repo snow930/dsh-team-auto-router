@@ -140,7 +140,7 @@ trim 后长度 > 200 字符即 +1。
 # 方式一：CLI（npm 包或本地路径）
 dsh plugin --profile web add ~/git/dsh-team-auto-router
 
-# 方式二：手动（本仓库当前采用）
+# 方式二：手动（link 到本地检出，路径按你的环境调整）
 # 1. profiles/web/package.json dependencies 增加
 #    "dsh-team-auto-router": "link:~/git/dsh-team-auto-router"
 # 2. dsh.profile.bundles 追加 "dsh-team-auto-router"（置于 dsh-agent-teams 之后）
@@ -148,9 +148,8 @@ dsh plugin --profile web add ~/git/dsh-team-auto-router
 # 4. profiles/web/cordis.patch.yml 追加覆盖行开启 ask/auto
 ```
 
-运行时依赖已随包声明（`@deepseek-ai/schemastery` 取自 npm；`@deepseek-ai/dsh-llm`
-经 file: symlink 指向宿主物理副本，与宿主零版本漂移），link 方式消费无需额外步骤。
-发布到 npm 前须将 file: 依赖改回正常版本号。
+运行时依赖已随包声明（`@deepseek-ai/schemastery` `^3.18.1`、
+`@deepseek-ai/dsh-llm` `^0.1.1-rc.2`），npm 与 link 两种消费方式均无需额外步骤。
 
 ## 边界与已知限制
 
@@ -165,3 +164,23 @@ dsh plugin --profile web add ~/git/dsh-team-auto-router
 ```bash
 npm test    # node --test，覆盖 scorer / goal / directive 全部纯逻辑
 ```
+
+## 更新日志
+
+### 0.1.2
+
+- 新增 **implement(+2)** 强信号：显式实施指令短语（「确认，开始实施」「按方案执行」
+  `proceed with the plan` 等）命中即达默认阈值，并豁免 `too-short` 与 `qa-shaped`
+  两道硬否决——覆盖「agent 出方案 → 用户短确认实施」这一此前完全无法触发的场景
+- 否定守卫：命中位置前 4 字符内出现否定片段（别/不/没/莫/勿/尚未）则不算
+- 测试 16 → 20 例，含真实生产措辞回归
+
+### 0.1.1
+
+- 评分器对真实中文表达的校准（此前阈值 4 下真实任务消息最高仅得 1 分）：
+  - 新增**紧凑内联枚举**信号（「1改宽侧边栏 2保持点击切换」式连续升序编号，
+    排除量词/小数/版本尾缀）
+  - 补口语并列连词（然后/另外/还有就是/还要/再把），嵌套命中去重
+  - `qa-shaped` 否决放宽：疑问开头但含祈使提示词（帮我/请/修复/排查…）时
+    正常进入评分而非一票否决
+- 推荐配置调整为 `scoreThreshold: 2`、`minLength: 30`（按真实会话实测校准）
