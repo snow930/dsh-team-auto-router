@@ -136,16 +136,25 @@ trim 后长度 > 200 字符即 +1。
 
 ## 安装
 
-```bash
-# 方式一：CLI（npm 包或本地路径）
-dsh plugin --profile web add ~/git/dsh-team-auto-router
+**推荐：从 npm 安装**：
 
-# 方式二：手动（link 到本地检出，路径按你的环境调整）
-# 1. profiles/web/package.json dependencies 增加
-#    "dsh-team-auto-router": "link:~/git/dsh-team-auto-router"
-# 2. dsh.profile.bundles 追加 "dsh-team-auto-router"（置于 dsh-agent-teams 之后）
-# 3. 在 profiles/web 下 pnpm install
-# 4. profiles/web/cordis.patch.yml 追加覆盖行开启 ask/auto
+```bash
+dsh plugin --profile web add dsh-team-auto-router
+```
+
+或手动编辑 `profiles/web/package.json`：`dependencies` 增加
+`"dsh-team-auto-router": "^0.1.0"`、`dsh.profile.bundles` 追加
+`"dsh-team-auto-router"`（置于 dsh-agent-teams 之后），然后在 profiles/web 下
+`pnpm install`。
+
+安装后在 `profiles/web/cordis.patch.yml` 追加覆盖行开启 ask/auto（见「配置」）。
+
+**本地开发（维护者迭代）**：link 到本地检出，修改源码后重启 DSH Web 即生效，
+无需重新发布 npm：
+
+```bash
+# profiles/web/package.json: "dsh-team-auto-router": "link:~/git/dsh-team-auto-router"
+dsh plugin --profile web add link:~/git/dsh-team-auto-router
 ```
 
 运行时依赖已随包声明（`@deepseek-ai/schemastery` `^3.18.1`、
