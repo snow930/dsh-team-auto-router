@@ -1,7 +1,7 @@
 {
   "name": "dsh-team-auto-router",
   "description": "Complexity-triggered auto activation for dsh-agent-teams: scores each genuine user message at the agent/pre-step boundary and, past the configured threshold, injects an ask-for-confirmation or a deterministic AgentTeams activation directive. Fully inert by default (autoTrigger: off).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

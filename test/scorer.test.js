@@ -92,3 +92,35 @@ test('interrogative opening with imperative hint is scored, not vetoed', () => {
     assert.equal(result.veto, null);
     assert.equal(result.ok, true);
 });
+
+test('explicit plan go-ahead fires even when short', () => {
+    const result = scoreGoal('确认，开始实施', OPTS);
+    assert.equal(result.ok, true);
+    assert.ok(result.signals.some((s) => s.startsWith('implement')), result.signals.join(';'));
+    assert.ok(result.score >= 2, `score=${result.score}`);
+});
+
+test('english plan go-ahead fires despite short length', () => {
+    const result = scoreGoal('Looks good. Please proceed with the plan.', OPTS);
+    assert.equal(result.ok, true);
+    assert.ok(result.signals.some((s) => s.startsWith('implement')), result.signals.join(';'));
+});
+
+test('negated implement phrases do not fire', () => {
+    const cases = [
+        '先别开始实施，我还有疑问',
+        '还没按方案执行，等我确认完风险点再说一遍完整的注意事项和后续安排吧',
+    ];
+    for (const text of cases) {
+        const result = scoreGoal(text, { minLength: 30 });
+        assert.ok(!result.signals.some((s) => s.startsWith('implement')), `${text}: ${result.signals.join(';')}`);
+    }
+});
+
+test('implement phrase inside a long task message adds its score', () => {
+    const text = '按此方案执行，四个改动域分别提交独立 commit，每步编译通过再继续，全部完成后在模拟器上按清单逐项验证并汇总结果';
+    const result = scoreGoal(text, OPTS);
+    assert.equal(result.ok, true);
+    assert.ok(result.signals.some((s) => s.startsWith('implement')), result.signals.join(';'));
+    assert.ok(result.score >= 2, `score=${result.score}, signals=${result.signals}`);
+});
