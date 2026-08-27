@@ -157,8 +157,10 @@ dsh plugin --profile web add dsh-team-auto-router
 dsh plugin --profile web add link:~/git/dsh-team-auto-router
 ```
 
-运行时依赖已随包声明（`@deepseek-ai/schemastery` `^3.18.1`、
-`@deepseek-ai/dsh-llm` `^0.1.1-rc.2`），npm 与 link 两种消费方式均无需额外步骤。
+运行时依赖已随包声明（仅 `@deepseek-ai/schemastery` `^3.18.1`；消息构造
+`createUserMessage` 已内联 `structuredClone + deepFreeze + randomUUID` 语义，
+不再依赖宿主已提供的 `@deepseek-ai/dsh-llm`，彻底消除清单层遮蔽警告），
+npm 与 link 两种消费方式均无需额外步骤。
 
 ## 边界与已知限制
 
